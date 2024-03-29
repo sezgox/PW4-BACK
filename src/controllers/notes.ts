@@ -42,36 +42,30 @@ export const getNotes = async (req: Request, res: Response) => {
         const listNotes = await Note.findAll({where: where});
         res.status(200).json(listNotes);
     } catch (error) {
-        res.json(error)
+        res.status(400).json(error)
     }
 }
 
 export const newNote = async (req: Request, res: Response) => {
     const {title,description,showAll} = req.body
+    const decodedToken = decodeToken(req);
+    const user = decodedToken.username;
 
     try {
-        const decodedToken = decodeToken(req);
-        const user = decodedToken.username;
-        try {
-            await Note.create({
-                title: title,
-                description: description,
-                showAll: showAll,
-                user: user
-            });
-            console.log(title,description,showAll,user)
-            res.status(200).json({
-                msg: "Nota creada"
-            });
-        } catch (error) {
-            res.status(400).json({
-                msg: "Nota no creada"
-            });
-        }
+        await Note.create({
+            title: title,
+            description: description,
+            showAll: showAll,
+            user: user
+        });
+        console.log(title,description,showAll,user)
+        res.status(200).json({
+            msg: "Nota creada"
+        });
     } catch (error) {
-        res.status(401).json({msg:"Error al decodificar token"});
-        console.log(error);
+        res.status(400).json(error);
     }
+
     
 }
 
@@ -93,7 +87,7 @@ export const editNote = async (req: Request, res: Response) => {
     const user = decodedToken.username;
     const currentNote = await Note.findOne({where: {id: id, user: user}});
     if (!currentNote){
-        return res.status(400).json({msg: "Usuario no es dueño de esa nota"})
+        return res.status(401).json({msg: "Usuario no es dueño de esa nota"})
     }
     try {
         await Note.update({
@@ -104,7 +98,7 @@ export const editNote = async (req: Request, res: Response) => {
         {where: {id: id}});
         res.status(200).json({msg:"Note edited"});
     } catch (error) {
-        res.status(400).json({msg:'Error al editar la nota'});
+        res.status(400).json(error);
     }
 }
 
@@ -121,5 +115,5 @@ export const removeNote = async (req: Request, res: Response) => {
             return res.json(error);
         }
     }
-    res.status(400).json({msg:"Usuario no tiene esa nota bribon"});
+    res.status(401).json({msg:"Usuario no tiene esa nota bribon"});
 }

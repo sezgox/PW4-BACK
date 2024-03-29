@@ -52,36 +52,28 @@ const getNotes = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json(listNotes);
     }
     catch (error) {
-        res.json(error);
+        res.status(400).json(error);
     }
 });
 exports.getNotes = getNotes;
 const newNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { title, description, showAll } = req.body;
+    const decodedToken = (0, validate_token_1.decodeToken)(req);
+    const user = decodedToken.username;
     try {
-        const decodedToken = (0, validate_token_1.decodeToken)(req);
-        const user = decodedToken.username;
-        try {
-            yield note_1.Note.create({
-                title: title,
-                description: description,
-                showAll: showAll,
-                user: user
-            });
-            console.log(title, description, showAll, user);
-            res.status(200).json({
-                msg: "Nota creada"
-            });
-        }
-        catch (error) {
-            res.status(400).json({
-                msg: "Nota no creada"
-            });
-        }
+        yield note_1.Note.create({
+            title: title,
+            description: description,
+            showAll: showAll,
+            user: user
+        });
+        console.log(title, description, showAll, user);
+        res.status(200).json({
+            msg: "Nota creada"
+        });
     }
     catch (error) {
-        res.status(401).json({ msg: "Error al decodificar token" });
-        console.log(error);
+        res.status(400).json(error);
     }
 });
 exports.newNote = newNote;
@@ -103,7 +95,7 @@ const editNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const user = decodedToken.username;
     const currentNote = yield note_1.Note.findOne({ where: { id: id, user: user } });
     if (!currentNote) {
-        return res.status(400).json({ msg: "Usuario no es dueño de esa nota" });
+        return res.status(401).json({ msg: "Usuario no es dueño de esa nota" });
     }
     try {
         yield note_1.Note.update({
@@ -114,7 +106,7 @@ const editNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.status(200).json({ msg: "Note edited" });
     }
     catch (error) {
-        res.status(400).json({ msg: 'Error al editar la nota' });
+        res.status(400).json(error);
     }
 });
 exports.editNote = editNote;
@@ -132,6 +124,6 @@ const removeNote = (req, res) => __awaiter(void 0, void 0, void 0, function* () 
             return res.json(error);
         }
     }
-    res.status(400).json({ msg: "Usuario no tiene esa nota bribon" });
+    res.status(401).json({ msg: "Usuario no tiene esa nota bribon" });
 });
 exports.removeNote = removeNote;

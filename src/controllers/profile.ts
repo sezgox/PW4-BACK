@@ -16,73 +16,16 @@ export const getProfileInfo = async (req: Request, res: Response) => {
         if(userInfo){
             res.status(200).json(userInfo)
         }else{
-            console.log('not found')
             res.status(400).json({msg:'User not found'})
         }
     } catch (error) {
-        res.status(400).json({msg:'Error al obtener el usuario'})
+        res.status(400).json(error)
     }
 }
-
-/* const getMyProfile = async (username: string) => {
-    const userInfo = await User.findOne({where:{ username: username},attributes: ['username', 'description','createdAt']});
-    const profileInfo: any = {
-        userInfo: {},
-        notesUser: {},
-        ownProfile: undefined
-    };
-    const notesUser = await Note.findAll({where: {user: username}});
-    profileInfo.userInfo = userInfo;
-    profileInfo.notesUser = notesUser;
-    profileInfo.ownProfile = true;
-    return (profileInfo);
-}
-
-const getProfile =  async (username:string) => {
-    const userInfo = await User.findOne({where:{ username: username},attributes: ['username', 'description','createdAt']});
-    const profileInfo: any = {
-        userInfo: {},
-        notesUser: {},
-        ownProfile: undefined
-    };
-    const notesUser = await Note.findAll({where: {user: username, showAll: true}});
-    profileInfo.userInfo = userInfo;
-    profileInfo.notesUser = notesUser;
-    profileInfo.ownProfile = false
-    return(profileInfo);
-}
-
-export const getInfoProfile = async (req: Request, res: Response) => {
-    const username = req.params.username;
-    const userInfo = await User.findOne({where:{ username: username}});
-    
-    let profileInfo: any = {
-        userInfo: {},
-        notesUser: {},
-        ownProfile: undefined
-    };
-
-    const decodedToken = decodeToken(req);
-    const user = decodedToken.username;
-
-    if(userInfo){
-        if(user == username){
-            profileInfo = await getMyProfile(username);
-        }else{
-            profileInfo = await getProfile(username);
-        }
-        res.json(profileInfo);
-    }else{
-        res.status(400).json({msg:'User not found'})
-    }
-} */
 
 export const myEditProfile = async (req: Request, res: Response) => {
     const username = req.params.username;
     const userInfo = await User.findOne({where:{ username: username},attributes: ['username', 'description']},);
-    let profileInfo: any = {
-        userInfo: {}
-    };
 
     const decodedToken = decodeToken(req);
     const user = decodedToken.username;
@@ -91,7 +34,7 @@ export const myEditProfile = async (req: Request, res: Response) => {
         if(user == username){
             res.json(userInfo);
         }else{
-            res.status(401).json({msg:'Unauthorized: user trying to change the profile of a different user'})
+            res.status(400).json({msg:'Unauthorized: user trying to change the profile of a different user'})
         }
     }else{
         res.status(400).json({msg:'User not found'})
@@ -103,7 +46,8 @@ export const updateProfile = async (req: Request, res: Response) => {
     const decodedToken = decodeToken(req);
     let currentUser = decodedToken.username;
     const {newUsername, newPassword, newDescription} = req.body;
-
+    console.log(newUsername, newPassword, newDescription);
+    if(newDescription == null && newPassword == null && newUsername == null) res.json(false)
     if(currentUser==currentUsername){
         if(newDescription){
             try {
@@ -124,21 +68,23 @@ export const updateProfile = async (req: Request, res: Response) => {
             try {
                 await User.update({username: newUsername}, {where: {username: currentUsername}});
                 currentUsername = newUsername;
+                const user: any = await User.findOne({where: {username: currentUsername}});
+                const token = jswt.sign({
+                    username: currentUsername,
+                    id: user.id
+                }, process.env.SECRET_KEY_TOKEN || 'KEY_PARA_TOKEN');
+                res.json(token);
             } catch (error) {
-                res.json(error)
+                res.status(400).json(error)
             }
+        }else{
+            res.status(200).json(true)
         }
-        const user: any = await User.findOne({where: {username: currentUsername}});
-        const token = jswt.sign({
-            username: currentUsername,
-            id: user.id
-        }, process.env.SECRET_KEY_TOKEN || 'KEY_PARA_TOKEN');
-        res.json(token);
+       
     }else{
         res.status(400).json({msg:'Este no eres tu guarron'});
     }
 }
-
 
 //NOMBRE DE USUARIO DISPONIBLE EN TIEMPO REAL
 export const checkUsername = async (req: Request, res: Response) => {

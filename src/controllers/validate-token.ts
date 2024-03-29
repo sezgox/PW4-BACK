@@ -13,8 +13,8 @@ export const validateToken = (req: Request, res: Response, next: NextFunction) =
             jswt.verify(token,process.env.SECRET_KEY_TOKEN || 'KEY_PARA_TOKEN');
             next();
         } catch (error) {
-            console.log('token invalido');
-            res.status(401).json({msg:"Token inválido"});
+            console.log('Invalid token');
+            res.status(401).json({msg:"Invalid token"});
         }
     }
 }
@@ -34,7 +34,7 @@ export const isAuth = (req: Request, res: Response) => {
             jswt.verify(token,process.env.SECRET_KEY_TOKEN || 'KEY_PARA_TOKEN');
             res.status(201).json(true)
         } catch (error) {
-            console.log('token invalido');
+            console.log('Invalid token');
             res.json(false);
         }
     }else{

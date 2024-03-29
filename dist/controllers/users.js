@@ -31,14 +31,12 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             username: username,
             password: hashedPassword
         });
-        res.json({
+        res.status(200).json({
             msg: "User created :)"
         });
     }
     catch (error) {
-        res.status(400).json({
-            msg: "User not created :("
-        });
+        res.status(400).json(error);
     }
 });
 exports.register = register;
@@ -48,7 +46,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         console.log(username, password);
         const user = yield user_1.User.findOne({ where: { username: req.body.username } });
         if (!user) {
-            return res.status(401).json({
+            return res.status(400).json({
                 msg: "User doesn't exists"
             });
         }
@@ -63,7 +61,7 @@ const login = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
         res.json(token);
     }
     catch (error) {
-        res.json({ msg: "Algo raro ha pasao" });
+        res.json(error);
     }
 });
 exports.login = login;

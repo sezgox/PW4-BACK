@@ -17,8 +17,8 @@ const validateToken = (req, res, next) => {
             next();
         }
         catch (error) {
-            console.log('token invalido');
-            res.status(401).json({ msg: "Token inválido" });
+            console.log('Invalid token');
+            res.status(401).json({ msg: "Invalid token" });
         }
     }
 };
@@ -39,7 +39,7 @@ const isAuth = (req, res) => {
             res.status(201).json(true);
         }
         catch (error) {
-            console.log('token invalido');
+            console.log('Invalid token');
             res.json(false);
         }
     }

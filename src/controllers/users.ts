@@ -18,13 +18,11 @@ export const register = async (req: Request, res: Response) => {
             username: username,
             password: hashedPassword
         });
-        res.json({
+        res.status(200).json({
             msg: "User created :)"
         });
     } catch (error) {
-        res.status(400).json({
-            msg: "User not created :("
-        });
+        res.status(400).json(error);
     }
 }
 
@@ -34,7 +32,7 @@ export const login = async (req: Request, res: Response) => {
         console.log(username, password)
         const user: any = await User.findOne({where: {username: req.body.username}})
         if (!user){
-            return res.status(401).json({
+            return res.status(400).json({
                 msg: "User doesn't exists"
             });
         }
@@ -48,6 +46,6 @@ export const login = async (req: Request, res: Response) => {
         }, process.env.SECRET_KEY_TOKEN || 'KEY_PARA_TOKEN');
         res.json(token);
     } catch (error) {
-        res.json({msg: "Algo raro ha pasao"})
+        res.json(error)
     }
 }
