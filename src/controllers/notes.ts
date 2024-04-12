@@ -12,7 +12,6 @@ export const getNotes = async (req: Request, res: Response) => {
     const date = filter.date ? filter.date : '01/01/2024';
     const username = filter.username ?? null;
     const showAllstr = filter.showAll ?? null;
-
     const where:any = {};
 
     if(username){

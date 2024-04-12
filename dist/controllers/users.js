@@ -24,16 +24,20 @@ const register = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
             msg: "Username already in use"
         });
     }
-    const hashedPassword = yield bcrypt_1.default.hash(password, 10);
-    console.log(hashedPassword);
     try {
-        yield user_1.User.create({
-            username: username,
-            password: hashedPassword
-        });
-        res.status(200).json({
-            msg: "User created :)"
-        });
+        const hashedPassword = yield bcrypt_1.default.hash(password, 10);
+        try {
+            yield user_1.User.create({
+                username: username,
+                password: hashedPassword
+            });
+            res.status(200).json({
+                msg: "User created :)"
+            });
+        }
+        catch (error) {
+            res.status(400).json(error);
+        }
     }
     catch (error) {
         res.status(400).json(error);
